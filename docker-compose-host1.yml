@@ -79,8 +79,6 @@ services:
     depends_on:
       - orderer.example.com
       - couchdb0
-    links:
-      -  orderer.example.com:orderer.example.com  
     networks:
       - my-net
 
