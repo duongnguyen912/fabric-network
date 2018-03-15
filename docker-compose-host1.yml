@@ -11,6 +11,7 @@ networks:
       name: my-net
     # attachable: true
 
+
 services:
   ca.example.com:
     image: hyperledger/fabric-ca
@@ -26,7 +27,7 @@ services:
       - ./crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca.example.com
     networks:
-      - my-net
+      - basic
 
   orderer.example.com:
     container_name: orderer.example.com
@@ -47,7 +48,7 @@ services:
         - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/msp/orderer
         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peerOrg1
     networks:
-      - my-net
+      - basic
 
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
@@ -65,7 +66,7 @@ services:
       # # https://docs.docker.com/compose/networking/
       - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=${COMPOSE_PROJECT_NAME}_basic
       - CORE_LEDGER_STATE_STATEDATABASE=CouchDB
-      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb0:5984
+      - CORE_LEDGER_STATE_COUCHDBCONFIG_COUCHDBADDRESS=couchdb:5984
       # The CORE_LEDGER_STATE_COUCHDBCONFIG_USERNAME and CORE_LEDGER_STATE_COUCHDBCONFIG_PASSWORD
       # provide the credentials for ledger to connect to CouchDB.  The username and password must
       # match the username and password set for the associated CouchDB.
@@ -85,8 +86,10 @@ services:
     depends_on:
       - orderer.example.com
       - couchdb0
+    links:
+      - orderer.example.com:orderer.example.com
     networks:
-      - my-net
+      - basic
 
   couchdb0:
     container_name: couchdb0
@@ -99,4 +102,4 @@ services:
     ports:
       - 5984:5984
     networks:
-      - my-net
+      - basic
