@@ -27,7 +27,7 @@ services:
       - ./crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca.example.com
     networks:
-      - basic
+      - my-net
 
   orderer.example.com:
     container_name: orderer.example.com
@@ -48,7 +48,7 @@ services:
         - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/msp/orderer
         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peerOrg1
     networks:
-      - basic
+      - my-net
 
   peer0.org1.example.com:
     container_name: peer0.org1.example.com
@@ -89,7 +89,7 @@ services:
     links:
       - orderer.example.com:orderer.example.com
     networks:
-      - basic
+      - my-net
 
   couchdb0:
     container_name: couchdb0
@@ -102,4 +102,4 @@ services:
     ports:
       - 5984:5984
     networks:
-      - basic
+      - my-net
