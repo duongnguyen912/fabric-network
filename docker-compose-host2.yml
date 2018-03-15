@@ -36,23 +36,23 @@ services:
 #    links:
 #      - orderer.example.com:orderer.example.com
 #      - peer0.org1.example.com:peer0.org1.example.com
-    depends_on:
-      - couchdb1
+#    depends_on:
+#      - couchdb1
     networks:
       - my-net
 
-  couchdb1:
-    container_name: couchdb1
-    image: hyperledger/fabric-couchdb
-    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
-    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
-    environment:
-      - COUCHDB_USER=
-      - COUCHDB_PASSWORD=
-    ports:
-      - 5984:5984
-    networks:
-      - my-net
+#  couchdb1:
+#    container_name: couchdb1
+#    image: hyperledger/fabric-couchdb
+#    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+#    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+#    environment:
+#      - COUCHDB_USER=
+#      - COUCHDB_PASSWORD=
+#    ports:
+#      - 5984:5984
+#    networks:
+#      - my-net
 
   cli:
     container_name: cli
