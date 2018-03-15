@@ -44,9 +44,9 @@ services:
         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/msp/peer
         - ./crypto-config/peerOrganizations/org1.example.com/users:/etc/hyperledger/msp/users
         - ./config:/etc/hyperledger/configtx
-    links:
-      - orderer.example.com:orderer.example.com
-      - peer0.org1.example.com:peer0.org1.example.com
+#    links:
+#      - orderer.example.com:orderer.example.com
+#      - peer0.org1.example.com:peer0.org1.example.com
     depends_on:
       - couchdb1
     networks:
