@@ -5,6 +5,12 @@
 #
 version: '2'
 
+networks:
+  my-net:
+    external:
+      name: my-net
+    # attachable: true
+
 services:
   ca.example.com:
     image: hyperledger/fabric-ca
@@ -40,19 +46,6 @@ services:
         - ./config/:/etc/hyperledger/configtx
         - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/msp/orderer
         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peerOrg1
-    networks:
-      - my-net
-
-  couchdb:
-    container_name: couchdb0
-    image: hyperledger/fabric-couchdb
-    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
-    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
-    environment:
-      - COUCHDB_USER=
-      - COUCHDB_PASSWORD=
-    ports:
-      - 5984:5984
     networks:
       - my-net
 
@@ -92,7 +85,18 @@ services:
     depends_on:
       - orderer.example.com
       - couchdb0
-    links:
-      -  orderer.example.com:orderer.example.com  
+    networks:
+      - my-net
+
+  couchdb0:
+    container_name: couchdb0
+    image: hyperledger/fabric-couchdb
+    # Populate the COUCHDB_USER and COUCHDB_PASSWORD to set an admin user and password
+    # for CouchDB.  This will prevent CouchDB from operating in an "Admin Party" mode.
+    environment:
+      - COUCHDB_USER=
+      - COUCHDB_PASSWORD=
+    ports:
+      - 5984:5984
     networks:
       - my-net
