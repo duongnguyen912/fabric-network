@@ -29,10 +29,9 @@ services:
       - 8051:7051
       - 8053:7053
     volumes:
-        - /var/run/:/host/var/run/
-        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/msp:/etc/hyperledger/msp/peer
-        - ./crypto-config/peerOrganizations/org1.example.com/users:/etc/hyperledger/msp/users
-        - ./config:/etc/hyperledger/configtx
+        - ./config/:/etc/hyperledger/configtx
+        - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/msp/orderer
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/:/etc/hyperledger/msp/peerOrg1
 #    depends_on:
 #      - orderer.example.com
 #      - couchdb0
