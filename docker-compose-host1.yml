@@ -73,7 +73,7 @@ services:
         - ./config:/etc/hyperledger/configtx
     depends_on:
       - orderer.example.com
-      - couchdb0
+#      - couchdb0
     links:
       - orderer.example.com:orderer.example.com
     networks:
