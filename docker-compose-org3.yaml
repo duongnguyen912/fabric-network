@@ -28,7 +28,7 @@ services:
         - /var/run/:/host/var/run/
         - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
         - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
-        - peer0.org3.example.com:/var/hyperledger/production
+#        - peer0.org3.example.com:/var/hyperledger/production
     ports:
       - 11051:7051
       - 11053:7053
@@ -50,7 +50,7 @@ services:
         - /var/run/:/host/var/run/
         - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/msp:/etc/hyperledger/fabric/msp
         - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/tls:/etc/hyperledger/fabric/tls
-        - peer1.org3.example.com:/var/hyperledger/production
+#        - peer1.org3.example.com:/var/hyperledger/production
     ports:
       - 12051:7051
       - 12053:7053
