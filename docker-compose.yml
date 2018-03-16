@@ -33,7 +33,7 @@ services:
       - ./crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca.example.com
     networks:
-      - basic
+      - my-net
 
   orderer.example.com:
     container_name: orderer.example.com
@@ -58,10 +58,10 @@ services:
       - my-net
 
   peer0.org1.example.com:
-     container_name: peer0.org1.example.com
-     extends:
-       file: peer-base.yaml
-       service: peer-base
+    container_name: peer0.org1.example.com
+    extends:
+      file: peer-base.yaml
+      service: peer-base
     environment:
       - CORE_PEER_ID=peer0.org1.example.com
       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
