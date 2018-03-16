@@ -5,13 +5,12 @@
 
 ## Prerequisites/Node Install
 
-
+```
 sudo usermod -aG docker $USER
 sudo add-apt-repository ppa:webupd8team/java
 sudo apt-get update
 sudo apt-get install oracle-java8-installer
 sudo apt-get install maven
-
 curl -sL https://deb.nodesource.com/setup_8.x | sudo -E bash -
 sudo apt-get install -y nodejs
 
@@ -21,7 +20,7 @@ cd fabric-samples
 git checkout v1.1.0-rc1
 curl -sSL https://goo.gl/6wtTN5 | bash -s 1.1.0-rc1
 
-install golang
+#install golang
 
 wget https://dl.google.com/go/go1.10.linux-amd64.tar.gz
 sudo tar -C /usr/local -xzf go1.10.linux-amd64.tar.gz
@@ -32,6 +31,7 @@ echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' | tee -a $HOME/.bashrc && \
 mkdir -p $HOME/go/{src,pkg,bin}
 
 echo 'export PATH=$PATH:$HOME/fabric-samples/bin' | tee -a $HOME/.bashrc 
+```
 
 
 ### Network Topology
