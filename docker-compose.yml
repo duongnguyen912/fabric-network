@@ -3,6 +3,9 @@
 #
 # SPDX-License-Identifier: Apache-2.0
 #
+
+
+
 version: '2'
 
 volumes:
@@ -23,15 +26,14 @@ services:
       - FABRIC_CA_SERVER_CA_NAME=ca.example.com
       - FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem
       - FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/7faa3ba78e7ec143492d4c06da6666c40d5a9001e27ea4dbd09e2f460f44b87f_sk
-      - CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=my-net
     ports:
-      - 7054:7054
+      - "7054:7054"
     command: sh -c 'fabric-ca-server start -b admin:adminpw -d'
     volumes:
       - ./crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config
     container_name: ca.example.com
     networks:
-      - my-net
+      - basic
 
   orderer.example.com:
     container_name: orderer.example.com
@@ -40,23 +42,18 @@ services:
       - ORDERER_GENERAL_LOGLEVEL=debug
       - ORDERER_GENERAL_LISTENADDRESS=0.0.0.0
       - ORDERER_GENERAL_GENESISMETHOD=file
-      - ORDERER_GENERAL_GENESISFILE=/var/hyperledger/orderer/orderer.genesis.block
+      - ORDERER_GENERAL_GENESISFILE=/etc/hyperledger/configtx/genesis.block
       - ORDERER_GENERAL_LOCALMSPID=OrdererMSP
-      - ORDERER_GENERAL_LOCALMSPDIR=/var/hyperledger/orderer/msp
-#      # enabled TLS
-#      - ORDERER_GENERAL_TLS_ENABLED=true
-#      - ORDERER_GENERAL_TLS_PRIVATEKEY=/var/hyperledger/orderer/tls/server.key
-#      - ORDERER_GENERAL_TLS_CERTIFICATE=/var/hyperledger/orderer/tls/server.crt
-#      - ORDERER_GENERAL_TLS_ROOTCAS=[/var/hyperledger/orderer/tls/ca.crt]
-    working_dir: /opt/gopath/src/github.com/hyperledger/fabric
+      - ORDERER_GENERAL_LOCALMSPDIR=/etc/hyperledger/msp/orderer/msp
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/orderer
     command: orderer
-    volumes:
-    - ./channel-artifacts/genesis.block:/var/hyperledger/orderer/orderer.genesis.block
-    - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/msp:/var/hyperledger/orderer/msp
-    - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/tls/:/var/hyperledger/orderer/tls
-    - orderer.example.com:/var/hyperledger/production/orderer
     ports:
       - 7050:7050
+    volumes:
+        - ./channel-artifacts/:/etc/hyperledger/configtx
+        - ./crypto-config/ordererOrganizations/example.com/orderers/orderer.example.com/:/etc/hyperledger/msp/orderer
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/:/etc/hyperledger/msp/peerOrg1
+        - orderer.example.com:/var/hyperledger/production/orderer
     networks:
       - my-net
 
@@ -65,21 +62,24 @@ services:
      extends:
        file: peer-base.yaml
        service: peer-base
-     environment:
-       - CORE_PEER_ID=peer0.org1.example.com
-       - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
-       - CORE_PEER_LOCALMSPID=Org1MSP
-     volumes:
-         - /var/run/:/host/var/run/
-         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/fabric/msp
-         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls:/etc/hyperledger/fabric/tls
-         - peer0.org1.example.com:/var/hyperledger/production
-     ports:
-       - 7051:7051
-       - 7053:7053
-     links:
-       - orderer.example.com:orderer.example.com
+    environment:
+      - CORE_PEER_ID=peer0.org1.example.com
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer0.org1.example.com:7051
+    # command: peer node start --peer-chaincodedev=true
+    ports:
+      - 7051:7051
+      - 7053:7053
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/msp/peer
+        - ./crypto-config/peerOrganizations/org1.example.com/users:/etc/hyperledger/msp/users
+        - ./channel-artifacts:/etc/hyperledger/configtx
+        - peer0.org1.example.com:/var/hyperledger/production
+    depends_on:
+      - orderer.example.com
+    networks:
+      - my-net
 
   peer1.org1.example.com:
     container_name: peer1.org1.example.com
@@ -91,50 +91,40 @@ services:
       - CORE_PEER_ADDRESS=peer1.org1.example.com:7051
       - CORE_PEER_GOSSIP_EXTERNALENDPOINT=peer1.org1.example.com:7051
       - CORE_PEER_GOSSIP_BOOTSTRAP=peer0.org1.example.com:7051
-      - CORE_PEER_LOCALMSPID=Org1MSP
-    volumes:
-        - /var/run/:/host/var/run/
-        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/msp:/etc/hyperledger/fabric/msp
-        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/tls:/etc/hyperledger/fabric/tls
-        - peer1.org1.example.com:/var/hyperledger/production
-
+    command: peer node start
+    # command: peer node start --peer-chaincodedev=true
     ports:
       - 8051:7051
       - 8053:7053
-    links:
-      - orderer.example.com:orderer.example.com
-
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./crypto-config/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/msp:/etc/hyperledger/msp/peer
+        - ./crypto-config/peerOrganizations/org1.example.com/users:/etc/hyperledger/msp/users
+        - ./channel-artifacts:/etc/hyperledger/configtx
+        - peer0.org1.example.com:/var/hyperledger/production
+    depends_on:
+      - orderer.example.com
+    networks:
+      - my-net
   cli:
-      container_name: cli
-      image: hyperledger/fabric-tools
-      tty: true
-      environment:
-        - GOPATH=/opt/gopath
-        - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
-        - CORE_LOGGING_LEVEL=DEBUG
-        - CORE_PEER_ID=cli
-        - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
-        - CORE_PEER_LOCALMSPID=Org1MSP
-#        - CORE_PEER_TLS_ENABLED=true
-        - CORE_PEER_TLS_CERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.crt
-        - CORE_PEER_TLS_KEY_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/server.key
-        - CORE_PEER_TLS_ROOTCERT_FILE=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/peers/peer0.org1.example.com/tls/ca.crt
-        - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
-      working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
-      #command: /bin/bash -c './scripts/script.sh mychannel 60; sleep 5'
-      volumes:
-          - /var/run/:/host/var/run/
-          - ./chaincode/:/opt/gopath/src/github.com/hyperledger/fabric/examples/chaincode/go
-          - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
-          - ./scripts:/opt/gopath/src/github.com/hyperledger/fabric/peer/scripts/
-          - ./channel-artifacts:/opt/gopath/src/github.com/hyperledger/fabric/peer/channel-artifacts
-      depends_on:
-        - orderer.example.com
-        - peer0.org1.example.com
-        - peer1.org1.example.com
-      links:
-        - orderer.example.com:orderer.example.com
-        - peer0.org1.example.com:peer0.org1.example.com
-        - peer1.org1.example.com:peer1.org1.example.com
-      networks:
+    container_name: cli
+    image: hyperledger/fabric-tools
+    tty: true
+    environment:
+      - GOPATH=/opt/gopath
+      - CORE_VM_ENDPOINT=unix:///host/var/run/docker.sock
+      - CORE_LOGGING_LEVEL=DEBUG
+      - CORE_PEER_ID=cli
+      - CORE_PEER_ADDRESS=peer0.org1.example.com:7051
+      - CORE_PEER_LOCALMSPID=Org1MSP
+      - CORE_PEER_MSPCONFIGPATH=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/peerOrganizations/org1.example.com/users/Admin@org1.example.com/msp
+      - CORE_CHAINCODE_KEEPALIVE=10
+    working_dir: /opt/gopath/src/github.com/hyperledger/fabric/peer
+    command: /bin/bash
+    volumes:
+        - /var/run/:/host/var/run/
+        - ./chaincode/:/opt/gopath/src/github.com/
+        - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./channel-artifacts:/etc/hyperledger/configtx
+    networks:
         - my-net
