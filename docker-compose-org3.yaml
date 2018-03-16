@@ -26,8 +26,8 @@ services:
       - CORE_PEER_LOCALMSPID=Org3MSP
     volumes:
         - /var/run/:/host/var/run/
-        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/fabric/msp
-        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/fabric/tls
+        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/msp:/etc/hyperledger/msp/peer
+        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer0.org3.example.com/tls:/etc/hyperledger/msp/tls
 #        - peer0.org3.example.com:/var/hyperledger/production
     ports:
       - 11051:7051
@@ -48,8 +48,8 @@ services:
       - CORE_PEER_LOCALMSPID=Org3MSP
     volumes:
         - /var/run/:/host/var/run/
-        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/msp:/etc/hyperledger/fabric/msp
-        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/tls:/etc/hyperledger/fabric/tls
+        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/msp:/etc/hyperledger/msp/msp
+        - ./org3-artifacts/crypto-config/peerOrganizations/org3.example.com/peers/peer1.org3.example.com/tls:/etc/hyperledger/msp/tls
 #        - peer1.org3.example.com:/var/hyperledger/production
     ports:
       - 12051:7051
