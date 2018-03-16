@@ -33,8 +33,6 @@ services:
         - ./crypto-config/peerOrganizations/org1.example.com/peers/peer1.org1.example.com/msp:/etc/hyperledger/msp/peer
         - ./crypto-config/peerOrganizations/org1.example.com/users:/etc/hyperledger/msp/users
         - ./channel-artifacts:/etc/hyperledger/configtx
-    depends_on:
-      - orderer.example.com
     networks:
       - my-net
   cli:
