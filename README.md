@@ -105,7 +105,7 @@ The below scripts will run on PC1. Execute each command in a separate terminal.
 Also make sure that you are in “fabric-netwoork” folder before executing any of the script. The scripts utilizes the files in the “fabric-netwoork” folder and will throw error if it can’t locate it.
 
 1. CA Server:
-You will execute this command on PC1. before you do so, replace {put the name of secret key} with the name of the secret key. You can find it under ‘/crypto-config/peerOrganizations/org1.example.com/ca/’.
+You will execute this command on PC1. before you do so, replace {put the name of secret key} with the name of the secret key. You can find it under ‘./crypto-config/peerOrganizations/org1.example.com/ca/’.
 
 docker run -d --network="my-net" --name ca.example.com -p 7054:7054 -e FABRIC_CA_HOME=/etc/hyperledger/fabric-ca-server -e FABRIC_CA_SERVER_CA_NAME=ca.example.com -e FABRIC_CA_SERVER_CA_CERTFILE=/etc/hyperledger/fabric-ca-server-config/ca.org1.example.com-cert.pem -e FABRIC_CA_SERVER_CA_KEYFILE=/etc/hyperledger/fabric-ca-server-config/{put the name of secret key} -v $(pwd)/crypto-config/peerOrganizations/org1.example.com/ca/:/etc/hyperledger/fabric-ca-server-config -e CORE_VM_DOCKER_HOSTCONFIG_NETWORKMODE=hyp-net hyperledger/fabric-ca sh -c 'fabric-ca-server start -b admin:adminpw -d'
 
