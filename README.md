@@ -141,8 +141,39 @@ docker exec -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051"  cli peer chainco
 docker exec -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
 ```
 
+# Adding an Org to a Channel
 
+### Setup the Environment
 
-Let's do it
+We will be operating from the root of the `fabric-network` subdirectory within your local clone of `fabric-network`.
+Change into that directory now. You will also want to open a few extra terminals for ease of use.
+
+Bring Org3 into the Channel with the Script
+You should be in first-network. To use the script, simply issue the following:
+
+```
+./eyfn.sh up
+
+```
+
+The output here is well worth reading. You’ll see the Org3 crypto material being added, the config update being created and signed, and then chaincode being installed to allow Org3 to execute ledger queries.
+
+If everything goes well, you’ll get this message:
+
+```
+========= All GOOD, EYFN test execution completed ===========
+```
+
+eyfn.sh can be used with the same Node.js chaincode and database options as byfn.sh by issuing the following (instead of ./byfn.sh -m -up):
+
+```
+./byfn.sh up -c testchannel -s couchdb -l node
+```
+
+And then:
+
+```
+./eyfn.sh up -c testchannel -s couchdb -l node
+```
 
 
