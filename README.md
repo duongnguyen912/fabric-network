@@ -26,10 +26,10 @@ $ wget https://dl.google.com/go/go1.10.linux-amd64.tar.gz
 $ sudo tar -C /usr/local -xzf go1.10.linux-amd64.tar.gz
 
 $ echo 'export PATH=$PATH:/usr/local/go/bin' | sudo tee -a /etc/profile && \
-$ echo 'export GOPATH=$HOME/go' | tee -a $HOME/.bashrc && \
-$ echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' | tee -a $HOME/.bashrc && \
-$ mkdir -p $HOME/go/{src,pkg,bin}
-echo 'export PATH=$PATH:$HOME/fabric-samples/bin' | tee -a $HOME/.bashrc
+ echo 'export GOPATH=$HOME/go' | tee -a $HOME/.bashrc && \
+ echo 'export PATH=$PATH:$GOROOT/bin:$GOPATH/bin' | tee -a $HOME/.bashrc && \
+ mkdir -p $HOME/go/{src,pkg,bin} \
+ echo 'export PATH=$PATH:$HOME/fabric-samples/bin' | tee -a $HOME/.bashrc
 
 ```
 
@@ -70,9 +70,10 @@ PC1:
 $ docker swarm join-token manager
 It will output something like this
 
-docker swarm join — token SWMTKN-1–3as8cvf3yxk8e7zj98954jhjza3w75mngmxh543llgpo0c8k7z-61zyibtaqjjimkqj8p6t9lwgu 172.16.0.153:2377
-We will copy it(the one on your terminal, not the one above) and execute it on PC2 terminal to make it join PC1
-
+```
+    docker swarm join — token SWMTKN-1–3as8cvf3yxk8e7zj98954jhjza3w75mngmxh543llgpo0c8k7z-61zyibtaqjjimkqj8p6t9lwgu 172.16.0.153:2377
+    We will copy it(the one on your terminal, not the one above) and execute it on PC2 terminal to make it join PC1
+```
 use the output command of the previous command on PC2
 
 Create a network (“my-net” in my case) — 
