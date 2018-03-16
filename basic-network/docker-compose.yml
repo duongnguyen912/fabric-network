@@ -117,6 +117,7 @@ services:
         - /var/run/:/host/var/run/
         - ./../chaincode/:/opt/gopath/src/github.com/
         - ./crypto-config:/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/
+        - ./config:/etc/hyperledger/configtx
     networks:
         - basic
     #depends_on:
