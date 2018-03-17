@@ -135,7 +135,7 @@ docker exec -e "CORE_PEER_ADDRESS=peer1.org1.example.com:7051" cli peer channel 
 Query
 ```
 #docker exec -e "CORE_PEER_ADDRESS=peer1.org1.example.com:7051"  cli peer chaincode install -n mycc2 -v 1.0 -p github.com/chaincode_example02
-docker exec -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli peer chaincode install -n mycc -v 1.0 -p github.com/chaincode_example02
+docker exec -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli peer chaincode install -n mycc -v 1.0 -p github.com/chaincode/chaincode_example02
 docker exec -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051"  cli peer chaincode instantiate -o orderer.example.com:7050 -C mychannel -n mycc -v 1.0 -c '{"Args":["init","a", "100", "b","200"]}' -P "OR ('Org1MSP.member','Org2MSP.member')"
 docker exec -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051"  cli peer chaincode invoke -o orderer.example.com:7050 -C mychannel -n mycc -v 1.0 -c '{"Args":["invoke","a","b","20"]}'
 docker exec -e "CORE_PEER_ADDRESS=peer0.org1.example.com:7051" cli peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
@@ -176,21 +176,82 @@ And then:
 ./eyfn.sh up -c testchannel -s couchdb -l node
 ```
 
+## Manually Stup
 
+### Generate the Org3 Crypto Material
 
+```
+cd org3-artifacts
+cryptogen generate --config=./org3-crypto.yaml
+export FABRIC_CFG_PATH=$PWD && configtxgen -printOrg Org3MSP > ../channel-artifacts/org3.json
+cd ../ && cp -r crypto-config/ordererOrganizations org3-artifacts/crypto-config/
 
-BUG:
+```
+
+ON `cli` Org1
+
+```
+docker exec -e "CHANNEL_NAME=mychannel" -e "ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/ca/ca.example.com-cert.pem" -it cli bash
+apt update && apt install -y jq
+```
+Then execute these commands :
+
+```
 export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/ca/ca.example.com-cert.pem && export CHANNEL_NAME=mychannel
+peer channel fetch config config_block.pb -o orderer.example.com:7050 -c $CHANNEL_NAME  --cafile $ORDERER_CA
+configtxlator proto_decode --input config_block.pb --type common.Block | jq .data.data[0].payload.data.config > config.json
+jq -s '.[0] * {"channel_group":{"groups":{"Application":{"groups": {"Org3MSP":.[1]}}}}}' config.json ./channel-artifacts/org3.json > modified_config.json
+configtxlator proto_encode --input config.json --type common.Config --output config.pb
+configtxlator proto_encode --input modified_config.json --type common.Config --output modified_config.pb
+configtxlator compute_update --channel_id $CHANNEL_NAME --original config.pb --updated modified_config.pb --output org3_update.pb
+configtxlator proto_decode --input org3_update.pb --type common.ConfigUpdate | jq . > org3_update.json
+echo '{"payload":{"header":{"channel_header":{"channel_id":"mychannel", "type":2}},"data":{"config_update":'$(cat org3_update.json)'}}}' | jq . > org3_update_in_envelope.json
+configtxlator proto_encode --input org3_update_in_envelope.json --type common.Envelope --output org3_update_in_envelope.pb
+```
+
+### Sign and Submit the Config Update
+
+```
+peer channel signconfigtx -f org3_update_in_envelope.pb
+peer channel update -f org3_update_in_envelope.pb -c $CHANNEL_NAME -o orderer.example.com:7050 --cafile $ORDERER_CA
+
+```
+
+### Join Org3 to the Channel
 
 
+```
+docker-compose -f docker-compose-org3.yaml up -d
+docker exec -e "CHANNEL_NAME=mychannel" -e "ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/ca/ca.example.com-cert.pem" -it Org3cli bash
+
+```
+
+ON `Org3cli` Org3
+
+```
 peer channel fetch 0 mychannel.block -o orderer.example.com:7050 -c $CHANNEL_NAME --cafile $ORDERER_CA
+peer channel join -b mychannel.block
+```
 
+### Upgrade and Invoke Chaincode
 
-peer chaincode install -n mycc -v 3.0 -p github.com/chaincode_example02/go/
+From the Org3 CLI:
 
+```
+peer chaincode install -n mycc -v 2.0 -p github.com/chaincode/chaincode_example02/go/
+```
 
-peer chaincode upgrade -o orderer.example.com:7050 --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 3.0 -c '{"Args":["init","a","90","b","210"]}' -P "OR ('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')"
+From the Org1 CLI:
 
+```
+peer chaincode install -n mycc -v 2.0 -p github.com/chaincode/chaincode_example02/go/
+peer chaincode upgrade -o orderer.example.com:7050 --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 2.0 -c '{"Args":["init","a","90","b","210"]}' -P "OR ('Org1MSP.member','Org2MSP.member','Org3MSP.member')"
+```
 
+From the Org3 CLI:
+
+```
+#docker exec -e "CORE_PEER_ADDRESS=peer0.org3.example.com:7051" Org3cli peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
 peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
-docker exec -e "CORE_PEER_ADDRESS=peer0.org3.example.com:7051" cli peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
+peer chaincode invoke -o orderer.example.com:7050  --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -c '{"Args":["invoke","a","b","10"]}'
+```
