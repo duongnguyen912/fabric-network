@@ -177,3 +177,20 @@ And then:
 ```
 
 
+
+
+BUG:
+export ORDERER_CA=/opt/gopath/src/github.com/hyperledger/fabric/peer/crypto/ordererOrganizations/example.com/ca/ca.example.com-cert.pem && export CHANNEL_NAME=mychannel
+
+
+peer channel fetch 0 mychannel.block -o orderer.example.com:7050 -c $CHANNEL_NAME --cafile $ORDERER_CA
+
+
+peer chaincode install -n mycc -v 3.0 -p github.com/chaincode_example02/go/
+
+
+peer chaincode upgrade -o orderer.example.com:7050 --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -v 3.0 -c '{"Args":["init","a","90","b","210"]}' -P "OR ('Org1MSP.peer','Org2MSP.peer','Org3MSP.peer')"
+
+
+peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
+docker exec -e "CORE_PEER_ADDRESS=peer0.org3.example.com:7051" cli peer chaincode query -C mychannel -n mycc -c '{"Args":["query","a"]}'
