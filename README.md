@@ -255,3 +255,11 @@ From the Org3 CLI:
 peer chaincode query -C $CHANNEL_NAME -n mycc -c '{"Args":["query","a"]}'
 peer chaincode invoke -o orderer.example.com:7050  --cafile $ORDERER_CA -C $CHANNEL_NAME -n mycc -c '{"Args":["invoke","a","b","10"]}'
 ```
+
+
+
+# Refs:
+
+* https://github.com/onechain/fabric-explorer
+* https://github.com/Altoros/fabric-rest
+* https://github.com/olegabu/fabric-starter
